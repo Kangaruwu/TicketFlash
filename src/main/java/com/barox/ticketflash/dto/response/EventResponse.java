@@ -2,6 +2,7 @@ package com.barox.ticketflash.dto.response;
 
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class EventResponse {
@@ -19,5 +20,8 @@ public class EventResponse {
     private String status;
     
     private VenueResponse venue;
+
+    private List<TicketClassResponse> ticketClasses;
+
 
 }

@@ -12,7 +12,6 @@ import com.barox.ticketflash.service.EventService;
 import com.barox.ticketflash.dto.response.EventResponse;
 import com.barox.ticketflash.entity.Event;
 import com.barox.ticketflash.dto.request.EventRequest;
-
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -31,15 +30,35 @@ public class EventServiceImpl implements EventService {
             throw new IllegalArgumentException("Event start time must be before end time.");
         }
         
+        // Get Venue
         Long venueId = request.getVenueId();
         Venue venue = venueRepository.findById(venueId)
-                .orElseThrow(() -> new DataNotFoundException("Venue not found with ID: " + venueId));
-
+        .orElseThrow(() -> new DataNotFoundException("Venue not found with ID: " + venueId));
+        
+        // Check capacity
+        int totalTickets = 0;
+        for (var ticketClassRequest : request.getTicketClasses()) {
+            totalTickets += ticketClassRequest.getQuantityAvailable();
+        }
+        if (totalTickets > venue.getCapacity()) {
+            throw new IllegalArgumentException("Total tickets exceed venue capacity.");
+        }
+        
+        // Create Event
         Event event = eventMapper.toEntity(request);
         event.setVenue(venue);
         event.setStatus(EventStatus.DRAFT);
-        Event savedEvent = eventRepository.save(event);
-        return eventMapper.toResponse(savedEvent);
+        
+        // Ensure bidirectional association: map ticket classes and set their parent event
+        if (event.getTicketClasses() != null) {
+            for (var ticketClass : event.getTicketClasses()) {
+                ticketClass.setEvent(event);
+                if (ticketClass.getQuantitySold() == null) {
+                    ticketClass.setQuantitySold(0);
+                }
+            }
+        }
+        return eventMapper.toResponse(eventRepository.save(event));
     }
 
     @Override
