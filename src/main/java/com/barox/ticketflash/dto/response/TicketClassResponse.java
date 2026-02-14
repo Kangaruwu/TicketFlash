@@ -3,6 +3,7 @@ import lombok.Data;
 
 @Data
 public class TicketClassResponse {
+    private Long id;
     private String name;
     private java.math.BigDecimal price;
     private Integer quantityAvailable;

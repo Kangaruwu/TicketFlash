@@ -83,7 +83,9 @@ public class EventServiceImpl implements EventService {
     }
     @Override
     public EventResponse getEventById(Long id) {
-        return null;
+        return eventRepository.findById(id)
+                .map(eventMapper::toResponse)
+                .orElseThrow(() -> new DataNotFoundException("Event not found with ID: " + id));
     }
 
 }

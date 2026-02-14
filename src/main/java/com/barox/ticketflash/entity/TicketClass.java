@@ -2,6 +2,7 @@ package com.barox.ticketflash.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -16,7 +17,11 @@ import jakarta.persistence.Column;
 import lombok.*;
 
 @Entity
-@Table(name = "ticket_classes")
+@Table(name = "ticket_classes", indexes = {
+    @Index(name = "idx_ticket_class_event_id", columnList = "event_id"),
+    @Index(name = "idx_ticket_class_name", columnList = "name"),
+    @Index(name = "idx_ticket_class_booking_id", columnList = "booking_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -47,4 +52,11 @@ public class TicketClass {
     @EqualsAndHashCode.Exclude  // <--- NÊN CÓ: Ngắt vòng lặp khi tính HashCode
     @JsonIgnore                 // <--- NÊN CÓ: Để khi trả JSON không bị lặp vô tận
     private Event event;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "booking_id", nullable = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonIgnore
+    private Booking booking;
 }
