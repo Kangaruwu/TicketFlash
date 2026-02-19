@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 CustomUserDetails userDetails = customUserDetailService.loadUserByUsernameOrEmail(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+                
                 // Nhiệm vụ chính của cả cái Filter này là bơm authentication vào SecurityContext.
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

@@ -1,10 +1,12 @@
 package com.barox.ticketflash.service.impl;
 
+import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import com.barox.ticketflash.dto.response.BookingResponse;
 import com.barox.ticketflash.mapper.TicketClassMapper;
 import com.barox.ticketflash.repository.EventRepository;
 import com.barox.ticketflash.repository.TicketClassRepository;
+import com.barox.ticketflash.security.CustomUserDetails;
 import com.barox.ticketflash.service.BookingService;
 import com.barox.ticketflash.dto.request.TicketBookingRequest;
 import com.barox.ticketflash.entity.Event;
@@ -32,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponse bookTickets(BookingRequest bookingRequest) {
+    public BookingResponse bookTickets(BookingRequest bookingRequest, CustomUserDetails userDetails) {
         // Validate event exists
         Event event = eventRepository.findById(bookingRequest.getEventId())
             .orElseThrow(() -> new DataNotFoundException("Event not found with ID: " + bookingRequest.getEventId()));
@@ -69,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
         BookingResponse response = new BookingResponse();
         response.setEventId(event.getId());
         response.setEventName(event.getName());
-        response.setEmail(bookingRequest.getEmail());
+        response.setEmail(userDetails.getEmail());
         response.setStatus(BookingStatus.CONFIRMED.name());
         response.setTotalTicket(totalTickets);
         response.setBookingDate(LocalDateTime.now());
