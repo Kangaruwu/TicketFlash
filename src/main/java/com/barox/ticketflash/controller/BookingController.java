@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.barox.ticketflash.dto.request.BookingRequest;
 import com.barox.ticketflash.dto.response.BookingResponse;
 import com.barox.ticketflash.security.CustomUserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -23,12 +25,19 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponse> bookTickets(
-            @Valid @RequestBody BookingRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-        ) 
-    {
+        @Valid @RequestBody BookingRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.bookTickets(request, userDetails));
     }
 
+
+    @GetMapping("/my-bookings")
+    public ResponseEntity<List<BookingResponse>> myBookings(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.myBookings(userDetails));
+    }
 }

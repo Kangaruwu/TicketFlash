@@ -19,8 +19,7 @@ import lombok.*;
 @Entity
 @Table(name = "ticket_classes", indexes = {
     @Index(name = "idx_ticket_class_event_id", columnList = "event_id"),
-    @Index(name = "idx_ticket_class_name", columnList = "name"),
-    @Index(name = "idx_ticket_class_booking_id", columnList = "booking_id")
+    @Index(name = "idx_ticket_class_name", columnList = "name")
 })
 @Getter
 @Setter
@@ -53,10 +52,4 @@ public class TicketClass {
     @JsonIgnore                 // <--- NÊN CÓ: Để khi trả JSON không bị lặp vô tận
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "booking_id", nullable = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @JsonIgnore
-    private Booking booking;
 }

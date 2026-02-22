@@ -60,5 +60,13 @@ public class AuthController {
         response.setUser(CustomUserDetails.mapToUserResponse(userDetails));
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<RegisterResponse> registerAdmin(@RequestBody RegisterRequest request) {
+        CustomUserDetails userDetails = customUserDetailService.registerAdmin(request);
+        RegisterResponse response = new RegisterResponse();
+        response.setUser(CustomUserDetails.mapToUserResponse(userDetails));
+        return ResponseEntity.ok(response);
+    }
     
 }

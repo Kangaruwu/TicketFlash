@@ -8,5 +8,6 @@ public interface CustomUserDetailService extends UserDetailsService {
 
     public CustomUserDetails loadUserByUsernameOrEmail(String usernameOrEmail);
     public CustomUserDetails register(RegisterRequest request);
+    public CustomUserDetails registerAdmin(RegisterRequest request);
 
 }

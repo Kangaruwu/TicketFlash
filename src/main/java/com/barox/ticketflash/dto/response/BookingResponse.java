@@ -13,6 +13,6 @@ public class BookingResponse {
     private String status;
     private Integer totalTicket;
     private LocalDateTime bookingDate;
-    private List<TicketClassResponse> ticketClasses;
+    private List<TicketBookingResponse> ticketDetails;
 
 }
