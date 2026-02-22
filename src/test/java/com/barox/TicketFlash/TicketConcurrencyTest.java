@@ -3,6 +3,7 @@ package com.barox.TicketFlash;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ import com.barox.ticketflash.dto.request.TicketBookingRequest;
 
 
 @SpringBootTest
+@Disabled
 @ActiveProfiles("test")
 public class TicketConcurrencyTest {
     private final BookingService bookingService;

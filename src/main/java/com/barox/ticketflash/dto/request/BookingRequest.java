@@ -8,6 +8,5 @@ import java.util.List;
 @AllArgsConstructor
 public class BookingRequest {
     private Long eventId;
-    private String email;
     private List<TicketBookingRequest> ticketDetails;
 }

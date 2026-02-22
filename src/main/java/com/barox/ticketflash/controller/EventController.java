@@ -14,7 +14,6 @@ import com.barox.ticketflash.service.EventService;
 import com.barox.ticketflash.dto.request.EventRequest;
 import com.barox.ticketflash.dto.response.EventResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
