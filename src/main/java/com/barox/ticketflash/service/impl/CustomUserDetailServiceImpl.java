@@ -31,13 +31,22 @@ public class CustomUserDetailServiceImpl implements CustomUserDetailService {
 
     @Override
     public CustomUserDetails register(RegisterRequest request) {
+        return registerWithRole(request, UserRole.USER);
+    }
+
+    @Override
+    public CustomUserDetails registerAdmin(RegisterRequest request) {
+        return registerWithRole(request, UserRole.ADMIN);
+    }
+
+    private CustomUserDetails registerWithRole(RegisterRequest request, UserRole role) {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(encodedPassword);
-        user.setRole(UserRole.USER);
+        user.setRole(role);
         user.setFullName(request.getFullName());
         return CustomUserDetails.mapToUserDetails(userRepository.save(user));
     }

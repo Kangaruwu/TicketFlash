@@ -1,0 +1,391 @@
+### ============================================================
+### TicketFlash API - Full Flow Test
+### Extension: REST Client (humao.rest-client)
+###
+### LUỒNG THỰC HIỆN:
+###   1.  Đăng ký tài khoản ADMIN  POST /auth/register-admin
+###   2.  Đăng nhập ADMIN          POST /auth/login  → lưu @adminToken
+###   3.  Tạo Venue                POST /venues      (đăng nhập)
+###   4.  Tạo Event + TicketClass  POST /events      (ADMIN)
+###   5.  Xem danh sách Events     GET  /events      (public)
+###   6.  Xem chi tiết Event       GET  /events/{id} (public)
+###   7.  Đăng ký tài khoản USER   POST /auth/register
+###   8.  Đăng nhập USER           POST /auth/login  → lưu @userToken
+###   9.  Book vé                  POST /bookings    (USER)
+###   10. Xem lịch sử booking      GET  /bookings/my-bookings (USER)
+### ============================================================
+
+@baseUrl = http://localhost:8080/api/v1
+
+# ──────────────────────────────────────────────────────────────
+# Cập nhật 2 biến này sau khi chạy request Login
+# ──────────────────────────────────────────────────────────────
+@adminToken = ...
+@userToken  = ...
+
+# IDs lấy từ response (cập nhật thủ công hoặc dùng scripting)
+@venueId      = 1
+@eventId      = 1
+@ticketVipId  = 1
+@ticketGaId   = 2
+
+
+### ============================================================
+### [1] AUTH - Đăng ký tài khoản ADMIN
+###     Endpoint mở, chỉ dùng để khởi tạo lần đầu
+### ============================================================
+
+# @name registerAdmin
+POST {{baseUrl}}/auth/register-admin
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@ticketflash.com",
+  "password": "Admin@123",
+  "fullName": "System Admin"
+}
+
+###
+
+
+### ============================================================
+### [2] AUTH - Đăng nhập ADMIN → lấy adminToken
+### ============================================================
+
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "admin",
+  "password": "Admin@123"
+}
+
+###
+
+# ──────────────────────────────────────────────────────────────
+# Sau khi chạy request trên, copy tokens.accessToken
+# vào biến @adminToken ở đầu file
+# ──────────────────────────────────────────────────────────────
+
+
+### ============================================================
+### [3] VENUE - Tạo venue mới (yêu cầu đăng nhập)
+### ============================================================
+
+# @name createVenue
+POST {{baseUrl}}/venues
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Nhà hát Lớn Hà Nội",
+  "address": "1 Tràng Tiền, Hoàn Kiếm, Hà Nội",
+  "capacity": 500
+}
+
+###
+
+# ──────────────────────────────────────────────────────────────
+# Copy `id` từ response → cập nhật @venueId
+# ──────────────────────────────────────────────────────────────
+
+
+### ============================================================
+### [3b] VENUE - Lấy danh sách tất cả venues
+### ============================================================
+
+GET {{baseUrl}}/venues
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+### ============================================================
+### [4] EVENT - Tạo event kèm ticket classes (yêu cầu ADMIN)
+###     ticketClasses được tạo cùng lúc với event (embedded)
+### ============================================================
+
+# @name createEvent
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Đêm nhạc Trịnh Công Sơn 2026",
+  "description": "Chương trình âm nhạc tưởng niệm nhạc sĩ Trịnh Công Sơn với sự tham gia của nhiều ca sĩ nổi tiếng.",
+  "startTime": "2026-08-15T19:00:00",
+  "endTime": "2026-08-15T22:00:00",
+  "venueId": {{venueId}},
+  "ticketClasses": [
+    {
+      "name": "VIP",
+      "price": 1500000,
+      "quantityAvailable": 50
+    },
+    {
+      "name": "General Admission",
+      "price": 500000,
+      "quantityAvailable": 300
+    },
+    {
+      "name": "Early Bird",
+      "price": 350000,
+      "quantityAvailable": 100
+    }
+  ]
+}
+
+###
+
+# ──────────────────────────────────────────────────────────────
+# Copy `id` của event → @eventId
+# Copy `id` của từng ticketClass → @ticketVipId, @ticketGaId
+# ──────────────────────────────────────────────────────────────
+
+
+### ============================================================
+### [5] EVENT - Lấy danh sách tất cả events (public - không cần token)
+### ============================================================
+
+GET {{baseUrl}}/events
+
+###
+
+
+### ============================================================
+### [6] EVENT - Lấy chi tiết một event theo ID (public)
+### ============================================================
+
+GET {{baseUrl}}/events/{{eventId}}
+
+###
+
+
+### ============================================================
+### [7] AUTH - Đăng ký tài khoản USER thường
+### ============================================================
+
+# @name registerUser
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "nguyenvana",
+  "email": "nguyenvana@example.com",
+  "password": "User@123",
+  "fullName": "Nguyễn Văn A"
+}
+
+###
+
+
+### ============================================================
+### [8] AUTH - Đăng nhập USER → lấy userToken
+### ============================================================
+
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "nguyenvana",
+  "password": "User@123"
+}
+
+###
+
+# ──────────────────────────────────────────────────────────────
+# Sau khi chạy request trên, copy tokens.accessToken
+# vào biến @userToken ở trên
+# ──────────────────────────────────────────────────────────────
+
+
+### ============================================================
+### [9] BOOKING - Book vé (yêu cầu USER role)
+###     Đặt 2 vé VIP + 3 vé General Admission
+### ============================================================
+
+# @name bookTickets
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "eventId": {{eventId}},
+  "ticketDetails": [
+    {
+      "ticketId": {{ticketVipId}},
+      "quantity": 2
+    },
+    {
+      "ticketId": {{ticketGaId}},
+      "quantity": 3
+    }
+  ]
+}
+
+###
+
+
+### ============================================================
+### [10] BOOKING - Xem lịch sử booking của tôi
+### ============================================================
+
+GET {{baseUrl}}/bookings/my-bookings
+Authorization: Bearer {{userToken}}
+
+###
+
+
+### ============================================================
+### ERROR CASES - Kiểm tra các trường hợp lỗi
+### ============================================================
+
+### [ERR-1] Book vé khi chưa đăng nhập → 401 Unauthorized
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+
+{
+  "eventId": {{eventId}},
+  "ticketDetails": [
+    {
+      "ticketId": {{ticketVipId}},
+      "quantity": 1
+    }
+  ]
+}
+
+###
+
+### [ERR-2] USER cố tạo event → 403 Forbidden
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "Unauthorized Event",
+  "description": "User không có quyền tạo event",
+  "startTime": "2026-09-01T19:00:00",
+  "endTime": "2026-09-01T21:00:00",
+  "venueId": {{venueId}},
+  "ticketClasses": [
+    {
+      "name": "Regular",
+      "price": 100000,
+      "quantityAvailable": 10
+    }
+  ]
+}
+
+###
+
+### [ERR-3] Tạo event với venueId không tồn tại → 404 Not Found
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Event với venue không tồn tại",
+  "description": "Test lỗi 404",
+  "startTime": "2026-10-01T18:00:00",
+  "endTime": "2026-10-01T21:00:00",
+  "venueId": 99999,
+  "ticketClasses": [
+    {
+      "name": "Regular",
+      "price": 100000,
+      "quantityAvailable": 10
+    }
+  ]
+}
+
+###
+
+### [ERR-4] Tạo event với tổng vé vượt capacity venue → 400 Bad Request
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Event vượt capacity",
+  "description": "Venue chỉ chứa 500 người nhưng bán 600 vé",
+  "startTime": "2026-11-01T18:00:00",
+  "endTime": "2026-11-01T21:00:00",
+  "venueId": {{venueId}},
+  "ticketClasses": [
+    {
+      "name": "Regular",
+      "price": 100000,
+      "quantityAvailable": 600
+    }
+  ]
+}
+
+###
+
+### [ERR-5] Book vé vượt số lượng còn lại → 400 Bad Request
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "eventId": {{eventId}},
+  "ticketDetails": [
+    {
+      "ticketId": {{ticketVipId}},
+      "quantity": 9999
+    }
+  ]
+}
+
+###
+
+### [ERR-6] Đăng nhập sai mật khẩu → 401 Unauthorized
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "nguyenvana",
+  "password": "SaiMatKhau@999"
+}
+
+###
+
+### [ERR-7] Đăng ký USER với email đã tồn tại → 500 (duplicate key)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "nguyenvana_dup",
+  "email": "nguyenvana@example.com",
+  "password": "User@123",
+  "fullName": "Nguyễn Văn A Duplicate"
+}
+
+###
+
+### [ERR-8] Đăng ký ADMIN lần 2 với username đã tồn tại → 500 (duplicate key)
+POST {{baseUrl}}/auth/register-admin
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin2@ticketflash.com",
+  "password": "Admin@123",
+  "fullName": "Admin Duplicate"
+}
+
+###
+
+### [ERR-9] Validation - Tạo venue thiếu trường bắt buộc → 400 Bad Request
+POST {{baseUrl}}/venues
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "address": "123 Đường ABC"
+}
+
+###
