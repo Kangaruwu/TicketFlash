@@ -9,13 +9,19 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface TicketClassMapper {
-    
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "event", ignore = true)
+    @Mapping(target = "quantitySold", constant = "0")
     TicketClass toEntity(TicketClassRequest request);
 
     // Chỉ lấy eventId từ event để tránh stack overflow
     @Mapping(target = "eventId", source = "event.id")
     TicketClassResponse toResponse(TicketClass ticketClass);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "event", ignore = true)
+    @Mapping(target = "quantitySold", ignore = true)
     void updateEntity(@MappingTarget TicketClass ticketClass, TicketClassRequest request);
 
 }

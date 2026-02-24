@@ -98,9 +98,8 @@ public class TicketConcurrencyTest {
                     latch.await();  // Wait for all threads to be ready
                     bookingService.bookTickets(new BookingRequest(
                         eventId, 
-                        "test@example.com", 
                         List.of(new TicketBookingRequest(ticketClassId, Integer.valueOf(1)))
-                    ));
+                    ), null);
                     successfulBookings.incrementAndGet();
                 } catch (Exception e) {
                     failedBookings.incrementAndGet();

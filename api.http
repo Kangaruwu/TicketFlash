@@ -21,7 +21,7 @@
 # Cập nhật 2 biến này sau khi chạy request Login
 # ──────────────────────────────────────────────────────────────
 @adminToken = ...
-@userToken  = ...
+@userToken  = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZ3V5ZW52YW5hIiwidG9rZW5fdHlwZSI6IkFDQ0VTUyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzcxOTQyNTEyLCJleHAiOjMxMjgxMTk0MjUxMn0.JDL1SvOvZTXw3Y0BWnIR5hBjfRZYCqrYCQklbKy7c18
 
 # IDs lấy từ response (cập nhật thủ công hoặc dùng scripting)
 @venueId      = 1
@@ -389,3 +389,7 @@ Authorization: Bearer {{adminToken}}
 }
 
 ###
+
+GET {{baseUrl}}/bookings/my-bookings
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
