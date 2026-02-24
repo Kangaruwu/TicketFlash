@@ -3,6 +3,8 @@ package com.barox.ticketflash.service.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.barox.ticketflash.dto.request.BookingRequest;
@@ -102,7 +104,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponse> myBookings(CustomUserDetails userDetails) {
-        return null;
+        return bookingRepository.findByEmail(userDetails.getEmail()).stream()
+        .map(bookingMapper::toResponse)    
+        .collect(Collectors.toList());
     }
 }
 

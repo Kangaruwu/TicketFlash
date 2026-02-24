@@ -1,6 +1,7 @@
 package com.barox.ticketflash.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import com.barox.ticketflash.dto.response.EventResponse;
 import com.barox.ticketflash.dto.request.EventRequest;
@@ -13,10 +14,17 @@ import com.barox.ticketflash.entity.Event;
 @Mapper(componentModel = "spring", uses = {VenueMapper.class, TicketClassMapper.class})
 public interface EventMapper {
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "venue", ignore = true)   // venue được set bởi service
+    @Mapping(target = "status", ignore = true)  // status được set bởi service
     Event toEntity(EventRequest event);
 
     EventResponse toResponse(Event event);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "venue", ignore = true)        // venue được set bởi service
+    @Mapping(target = "status", ignore = true)       // status không cập nhật qua request
+    @Mapping(target = "ticketClasses", ignore = true) // ticketClasses được quản lý riêng
     void updateEntity(@MappingTarget Event event, EventRequest eventRequest);
     
 }
