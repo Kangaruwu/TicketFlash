@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.barox.ticketflash.dto.request.BookingRequest;
@@ -24,6 +25,7 @@ import com.barox.ticketflash.entity.BookingDetails;
 import com.barox.ticketflash.mapper.BookingMapper;
 import com.barox.ticketflash.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
+import com.barox.ticketflash.event.BookingSuccessEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class BookingServiceImpl implements BookingService {
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
+    private final ApplicationEventPublisher publisher;
 
     @Override
     @Transactional
@@ -95,10 +98,18 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Store booking information in database
-        bookingRepository.save(booking);
 
+        bookingRepository.save(booking);
         BookingResponse response = bookingMapper.toResponse(booking);
         response.setTicketDetails(ticketBookingResponses);
+
+        // Publish event for sending confirmation email
+        publisher.publishEvent(new BookingSuccessEvent(
+            userDetails.getEmail(), 
+            event.getName(), 
+            totalTickets
+        ));
+
         return response;
     }
 
