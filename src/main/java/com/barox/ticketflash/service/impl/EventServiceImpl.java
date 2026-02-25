@@ -12,6 +12,9 @@ import com.barox.ticketflash.service.EventService;
 import com.barox.ticketflash.dto.response.EventResponse;
 import com.barox.ticketflash.entity.Event;
 import com.barox.ticketflash.dto.request.EventRequest;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -23,8 +26,10 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final VenueRepository venueRepository;
+    // private final CacheManager cacheManager;
 
     @Override
+    @CacheEvict(value = "events", key="'all'")
     public EventResponse createEvent(EventRequest request) throws DataNotFoundException{
         if (request.getStartTime().isAfter(request.getEndTime())) {
             throw new IllegalArgumentException("Event start time must be before end time.");
@@ -58,15 +63,27 @@ public class EventServiceImpl implements EventService {
                 }
             }
         }
+
+        // Delete cache for events list
+        //cacheManager.getCache("events").clear();
+
         return eventMapper.toResponse(eventRepository.save(event));
     }
 
     @Override
+    @Cacheable(value = "events", key="'all'")
     public List<EventResponse> getAllEvents() {
-        return eventRepository.findAll()
+        // if (cacheManager.getCache("events").get("all") != null) {
+        //     return cacheManager.getCache("events").get("all", List.class);
+        // }
+
+        List<EventResponse> events = eventRepository.findAll()
                 .stream()
                 .map(eventMapper::toResponse)
                 .collect(Collectors.toList());
+
+        //cacheManager.getCache("events").put("all", events);
+        return events;
     }
 
     @Override
@@ -82,10 +99,18 @@ public class EventServiceImpl implements EventService {
         return null;
     }
     @Override
+    @Cacheable(value = "events", key="#id")
     public EventResponse getEventById(Long id) {
-        return eventRepository.findById(id)
+        // if (cacheManager.getCache("event").get(id) != null) {
+        //     return cacheManager.getCache("event").get(id, EventResponse.class);
+        // }
+        
+        EventResponse eventResponse = eventRepository.findById(id)
                 .map(eventMapper::toResponse)
                 .orElseThrow(() -> new DataNotFoundException("Event not found with ID: " + id));
+        
+        //cacheManager.getCache("event").put(id, eventResponse);
+        return eventResponse;
     }
 
 }

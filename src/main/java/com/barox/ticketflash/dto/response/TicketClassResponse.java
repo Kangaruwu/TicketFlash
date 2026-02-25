@@ -2,7 +2,7 @@ package com.barox.ticketflash.dto.response;
 import lombok.Data;
 
 @Data
-public class TicketClassResponse {
+public class TicketClassResponse implements java.io.Serializable {
     private Long id;
     private String name;
     private java.math.BigDecimal price;
