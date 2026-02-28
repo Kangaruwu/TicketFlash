@@ -33,6 +33,9 @@ services:
     container_name: ticketflash_redis
     ports:
       - "${REDIS_PORT}:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     networks:
       - ticketflash-network
     restart: unless-stopped
