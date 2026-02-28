@@ -39,7 +39,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
         try {
             RateLimit rateLimit = handlerMethod.getMethodAnnotation(RateLimit.class);
-            log.info("RateLimit annotation: {}", rateLimit);
             if (rateLimit != null) {
                 var probe = rateLimiter.tryAccess(redisKey, rateLimit.capacity(), rateLimit.refillTokens());
                 if (!probe.isConsumed()) {
@@ -57,7 +56,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             }
         } 
         catch (Exception e) {
-            log.error("redis chết ngắc khi gặp key {}. ", redisKey, e.getMessage());
+            log.error("redis chết ngắc khi gặp key {}, {}. ", redisKey, e.getMessage());
             // cho qua: fail-open
             return true;
         }
