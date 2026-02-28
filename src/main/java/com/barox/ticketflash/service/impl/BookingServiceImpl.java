@@ -3,8 +3,8 @@ package com.barox.ticketflash.service.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +16,7 @@ import com.barox.ticketflash.repository.EventRepository;
 import com.barox.ticketflash.repository.TicketClassRepository;
 import com.barox.ticketflash.security.CustomUserDetails;
 import com.barox.ticketflash.service.BookingService;
+import com.barox.ticketflash.service.producer.BookingProducer;
 import com.barox.ticketflash.entity.Event;
 import com.barox.ticketflash.entity.TicketClass;
 import com.barox.ticketflash.enums.BookingStatus;
@@ -36,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
     private final ApplicationEventPublisher publisher;
+    private final BookingProducer bookingProducer;
 
     @Override
     @Transactional
@@ -51,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = Booking.builder()
             .email(userDetails.getEmail())
-            .status(BookingStatus.CONFIRMED)
+            .status(BookingStatus.PENDING)
             .totalTicket(totalTickets)
             .bookingDate(LocalDateTime.now())
             .event(event)
@@ -110,6 +112,9 @@ public class BookingServiceImpl implements BookingService {
             totalTickets
         ));
 
+        // Send booking information to delay queue
+        bookingProducer.sendBookingToQueue(response.getId());
+
         return response;
     }
 
@@ -118,6 +123,41 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findByEmail(userDetails.getEmail()).stream()
         .map(bookingMapper::toResponse)    
         .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void restoreTickets(Booking booking) {
+        List<BookingDetails> bookingDetails = booking.getBookingDetails();
+
+        for (BookingDetails detail: bookingDetails) {
+            TicketClass ticketClass = ticketClassRepository.findByIdWithLock(detail.getTicketClass().getId());
+            if (ticketClass == null) {
+                throw new DataNotFoundException("Cannot find ticket class to restore");
+            }
+            ticketClass.setQuantityAvailable(
+                ticketClass.getQuantityAvailable() + detail.getQuantity()
+            );
+            ticketClass.setQuantitySold(
+                ticketClass.getQuantitySold() - detail.getQuantity()
+            );
+            ticketClassRepository.save(ticketClass);
+        }
+
+    }
+
+    @Override
+    public BookingResponse myBookingsWithId(UUID bookingId, CustomUserDetails userDetails) {
+        Booking booking = bookingRepository.getReferenceById(bookingId);
+        if (booking == null) {
+            throw new DataNotFoundException("Booking not found with ID: " + bookingId);
+        }
+
+        if (!booking.getEmail().equals(userDetails.getEmail())) {
+            throw new DataNotFoundException("Booking not found for the current user");
+        }
+
+        return bookingMapper.toResponse(booking);
     }
 }
 

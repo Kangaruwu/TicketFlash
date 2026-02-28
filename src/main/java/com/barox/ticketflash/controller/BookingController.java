@@ -14,7 +14,9 @@ import com.barox.ticketflash.dto.request.BookingRequest;
 import com.barox.ticketflash.dto.response.BookingResponse;
 import com.barox.ticketflash.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/bookings")
@@ -40,4 +42,14 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(bookingService.myBookings(userDetails));
     }
+
+    @GetMapping("/my-bookings/{bookingId}")
+    public ResponseEntity<BookingResponse> getBookingById(
+        @PathVariable UUID bookingId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(bookingService.myBookingsWithId(bookingId, userDetails));
+    }
+    
 }
