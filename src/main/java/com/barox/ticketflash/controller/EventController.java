@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 import com.barox.ticketflash.service.EventService;
+import com.barox.ticketflash.annotation.RateLimit;
 import com.barox.ticketflash.dto.request.EventRequest;
 import com.barox.ticketflash.dto.response.EventResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class EventController {
     }
 
     @GetMapping
+    @RateLimit(capacity = 5, refillTokens = 5) // Giới hạn 5 req/phút cho endpoint này
     public ResponseEntity<List<EventResponse>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents());
     }
