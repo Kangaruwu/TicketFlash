@@ -393,3 +393,14 @@ Authorization: Bearer {{adminToken}}
 GET {{baseUrl}}/bookings/my-bookings
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
+
+###
+@bookingId = 791bd3f8-4d00-451f-88e9-e79f560392d8
+POST {{baseUrl}}/payments/{{bookingId}}/pay
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+###
+GET {{baseUrl}}/bookings/my-bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}

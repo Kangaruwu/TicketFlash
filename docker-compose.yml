@@ -37,10 +37,24 @@ services:
       - ticketflash-network
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: ticketflash_rabbitmq
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 networks:
   ticketflash-network:
     driver: bridge
 
 volumes:
   pgdata:
+    driver: local
+  rabbitmq_data:
     driver: local
