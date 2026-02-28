@@ -51,7 +51,6 @@ public class RedisRateLimiter {
     // ConsumptionProbe (Cây dò tiêu thụ). Nó chứa mọi thông tin cần từ Redis trả về trong một lần gọi mạng duy nhất
     // để lấy thời gian chờ
     public ConsumptionProbe tryAccess(String identifier, int capacity, int refillTokens) {
-        log.info("Trying to access with identifier: {}, capacity: {}, refillTokens: {}", identifier, capacity, refillTokens);
         BucketProxy bucket = resolveBucket(identifier, capacity, refillTokens);
         return bucket.tryConsumeAndReturnRemaining(1);
     }
