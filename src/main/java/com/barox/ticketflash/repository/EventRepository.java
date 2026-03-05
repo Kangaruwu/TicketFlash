@@ -1,5 +1,7 @@
 package com.barox.ticketflash.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.barox.ticketflash.entity.Event;
@@ -15,4 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Override
     @EntityGraph(attributePaths = {"venue", "ticketClasses"})
     public List<Event> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"venue", "ticketClasses"})
+    public Page<Event> findAll(Pageable pageable);
 }
