@@ -410,3 +410,8 @@ Authorization: Bearer {{userToken}}
 GET {{baseUrl}}/events?page=0&size=10&sortBy=name&sortDir=asc
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
+
+### Search events by name and status with pagination
+GET {{baseUrl}}/events/search?name=Trịnh&status=DRAFT&page=0&size=2&sortBy=startTime&sortDir=desc
+Content-Type: application/json
+Authorization: Bearer {{userToken}}

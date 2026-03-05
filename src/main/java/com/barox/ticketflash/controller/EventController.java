@@ -15,6 +15,7 @@ import com.barox.ticketflash.annotation.RateLimit;
 import com.barox.ticketflash.dto.request.EventRequest;
 import com.barox.ticketflash.dto.response.EventResponse;
 import com.barox.ticketflash.dto.response.PagedResponse;
+import com.barox.ticketflash.enums.EventStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,5 +48,15 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
     
-
+    @GetMapping("/search")
+    public ResponseEntity<?> searchEvents(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) EventStatus status, // BẮT BUỘC LÀ ENUM
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(eventService.searchEvents(name, status, page, size, sortBy, sortDir));
+    }
 }
