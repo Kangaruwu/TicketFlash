@@ -2,6 +2,7 @@ package com.barox.ticketflash.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import java.util.List;
 import com.barox.ticketflash.service.EventService;
 import com.barox.ticketflash.annotation.RateLimit;
 import com.barox.ticketflash.dto.request.EventRequest;
 import com.barox.ticketflash.dto.response.EventResponse;
+import com.barox.ticketflash.dto.response.PagedResponse;
+import com.barox.ticketflash.enums.EventStatus;
+
 import lombok.RequiredArgsConstructor;
 
 
@@ -31,8 +34,13 @@ public class EventController {
 
     @GetMapping
     @RateLimit(capacity = 5, refillTokens = 5) // Giới hạn 5 req/phút cho endpoint này
-    public ResponseEntity<List<EventResponse>> getAllEvents() {
-        return ResponseEntity.ok(eventService.getAllEvents());
+    public ResponseEntity<PagedResponse<EventResponse>> getAllEvents(
+        @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+        @RequestParam(value = "size", defaultValue = "10", required = false) int size,
+        @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+        @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(eventService.getAllEvents(page, size, sortBy, sortDir));
     }
 
     @GetMapping("/{id}")
@@ -40,5 +48,15 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
     
-
+    @GetMapping("/search")
+    public ResponseEntity<?> searchEvents(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) EventStatus status, // BẮT BUỘC LÀ ENUM
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(eventService.searchEvents(name, status, page, size, sortBy, sortDir));
+    }
 }

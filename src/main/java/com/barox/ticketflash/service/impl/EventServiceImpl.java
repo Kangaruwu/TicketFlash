@@ -9,11 +9,18 @@ import com.barox.ticketflash.entity.Venue;
 import com.barox.ticketflash.enums.EventStatus;
 import com.barox.ticketflash.exception.DataNotFoundException;
 import com.barox.ticketflash.service.EventService;
+import com.querydsl.core.BooleanBuilder;
 import com.barox.ticketflash.dto.response.EventResponse;
+import com.barox.ticketflash.dto.response.PagedResponse;
 import com.barox.ticketflash.entity.Event;
+import com.barox.ticketflash.entity.QEvent;
 import com.barox.ticketflash.dto.request.EventRequest;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.stream.Collectors;
 import java.util.List;
@@ -71,19 +78,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Cacheable(value = "events", key="'all'")
-    public List<EventResponse> getAllEvents() {
-        // if (cacheManager.getCache("events").get("all") != null) {
-        //     return cacheManager.getCache("events").get("all", List.class);
-        // }
+    @Cacheable(value = "events", key = "#page + '-' + #size + '-' + #sortBy + '-' + #sortDir")    
+    public PagedResponse<EventResponse> getAllEvents(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? 
+            Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        List<EventResponse> events = eventRepository.findAll()
-                .stream()
+        Page<Event> eventPage = eventRepository.findAll(pageable);
+
+        List<EventResponse> events = eventPage.getContent().stream()
                 .map(eventMapper::toResponse)
                 .collect(Collectors.toList());
 
-        //cacheManager.getCache("events").put("all", events);
-        return events;
+        return PagedResponse.<EventResponse>builder()
+                .content(events)
+                .pageNumber(page)
+                .pageSize(size)
+                .totalElements(eventPage.getTotalElements())
+                .totalPages(eventPage.getTotalPages())
+                .last(eventPage.isLast())
+                .build();
     }
 
     @Override
@@ -91,7 +105,7 @@ public class EventServiceImpl implements EventService {
         return null;
     }
     @Override
-    public List<EventResponse> getEventsByStatus(String status) {
+    public List<EventResponse> getEventsByStatus(EventStatus status) {
         return null;
     }
     @Override
@@ -113,4 +127,36 @@ public class EventServiceImpl implements EventService {
         return eventResponse;
     }
 
+    @Override
+    public PagedResponse<EventResponse> searchEvents(String name, EventStatus status, int page, int size, String sortBy, String sortDir) {
+        QEvent qEvent = QEvent.event;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (name != null && !name.isEmpty()) {
+            predicate.and(qEvent.name.containsIgnoreCase(name)); // Dịch ra: LIKE %name%
+        }
+
+        if (status != null) {
+            predicate.and(qEvent.status.eq(status)); // Dịch ra: = status
+        }
+
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? 
+            Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Event> eventPage = eventRepository.findAll(predicate.getValue(), pageable);
+
+        List<EventResponse> events = eventPage.getContent().stream()
+                .map(eventMapper::toResponse)
+                .collect(Collectors.toList());
+
+        return PagedResponse.<EventResponse>builder()
+                .content(events)
+                .pageNumber(page)
+                .pageSize(size)
+                .totalElements(eventPage.getTotalElements())
+                .totalPages(eventPage.getTotalPages())
+                .last(eventPage.isLast())
+                .build();
+    }
 }

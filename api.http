@@ -20,8 +20,8 @@
 # ──────────────────────────────────────────────────────────────
 # Cập nhật 2 biến này sau khi chạy request Login
 # ──────────────────────────────────────────────────────────────
-@adminToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInRva2VuX3R5cGUiOiJBQ0NFU1MiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzIwMjYxMDUsImV4cCI6MzEyODEyMDI2MTA1fQ.8a11JtfLHqSCZz4rIeUdxxV0K7ooZSd-TDOzIKqmPz0
-@userToken  = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZ3V5ZW52YW5hIiwidG9rZW5fdHlwZSI6IkFDQ0VTUyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzcxOTQyNTEyLCJleHAiOjMxMjgxMTk0MjUxMn0.JDL1SvOvZTXw3Y0BWnIR5hBjfRZYCqrYCQklbKy7c18
+@adminToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInRva2VuX3R5cGUiOiJBQ0NFU1MiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzI3MTYwNzMsImV4cCI6MzEyODEyNzE2MDczfQ.LoGLDaggvkncx24wrwBIW1o5HcWqKuPXxx-s-PpnG5g
+@userToken  = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZ3V5ZW52YW5hIiwidG9rZW5fdHlwZSI6IkFDQ0VTUyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzcyNzE2MDk5LCJleHAiOjMxMjgxMjcxNjA5OX0.-xzxxrM_NPzYFoUO5iAN8MGr0NPkh6DpEE4xQkvKylo
 
 # IDs lấy từ response (cập nhật thủ công hoặc dùng scripting)
 @venueId      = 1
@@ -402,5 +402,16 @@ Authorization: Bearer {{userToken}}
 
 ###
 GET {{baseUrl}}/bookings/my-bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+
+### Get all events with pagination
+GET {{baseUrl}}/events?page=0&size=10&sortBy=name&sortDir=asc
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+### Search events by name and status with pagination
+GET {{baseUrl}}/events/search?name=Trịnh&status=DRAFT&page=0&size=2&sortBy=startTime&sortDir=desc
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
