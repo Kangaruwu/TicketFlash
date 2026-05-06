@@ -57,6 +57,8 @@ public class BookingServiceImpl implements BookingService {
             .totalTicket(totalTickets)
             .bookingDate(LocalDateTime.now())
             .event(event)
+            .qrToken(UUID.randomUUID())
+            .checkedIn(false)
             .build();
 
         // Sort id vé trong request trước vì có khi người gửi lên mua vé 1, 2

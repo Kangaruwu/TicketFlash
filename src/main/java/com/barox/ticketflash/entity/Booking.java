@@ -62,6 +62,15 @@ public class Booking {
     @JoinColumn(name = "event_id", nullable = false) //Thể hiện ràng buộc Total Participation (Booking bắt buộc có Event)
     private Event event;
 
+    @Column(name = "qr_token", nullable = false, unique = true, updatable = false)
+    private UUID qrToken;
+
+    @Column(name = "checked_in", nullable = false)
+    private boolean checkedIn = false;
+
+    @Column(name = "checked_in_at")
+    private LocalDateTime checkedInAt;
+
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<BookingDetails> bookingDetails;
 

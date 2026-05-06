@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class BookingResponse {
     
     private UUID id;
+    private UUID qrToken;
     private String eventName;
     private Long eventId;
     private String email;
