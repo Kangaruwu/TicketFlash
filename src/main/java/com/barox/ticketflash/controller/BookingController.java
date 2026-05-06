@@ -15,6 +15,8 @@ import com.barox.ticketflash.dto.response.BookingResponse;
 import com.barox.ticketflash.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.MediaType;
+import com.barox.ticketflash.service.QrCodeService;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class BookingController {
     
     private final BookingService bookingService;
+    private final QrCodeService qrCodeService;
 
     @PostMapping
     public ResponseEntity<BookingResponse> bookTickets(
@@ -51,5 +54,14 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(bookingService.myBookingsWithId(bookingId, userDetails));
     }
-    
+
+    @GetMapping(value = "/my-bookings/{bookingId}/qr", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getQrCode(
+        @PathVariable UUID bookingId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        BookingResponse booking = bookingService.myBookingsWithId(bookingId, userDetails);
+        byte[] qrImage = qrCodeService.generateQrCode(booking.getId(), booking.getQrToken());
+        return ResponseEntity.ok(qrImage);
+    }
 }
